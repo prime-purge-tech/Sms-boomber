@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Prime Purge • Statut en direct</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #0a0e0d;
+            color: #f2f5f4;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            padding: 30px 16px;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 28px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .brand {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #2ee6ad;
+            text-shadow: 0 0 20px rgba(46, 230, 173, 0.2);
+        }
+
+        .badge {
+            background: rgba(46, 230, 173, 0.12);
+            border: 1px solid rgba(46, 230, 173, 0.25);
+            padding: 6px 14px;
+            border-radius: 30px;
+            font-size: 0.75rem;
+            color: #2ee6ad;
+            font-weight: 600;
+        }
+
+        .card {
+            background: #121614;
+            border: 1px solid rgba(46, 230, 173, 0.2);
+            border-radius: 18px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.4);
+        }
+
+        .card-title {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #8fa39c;
+            margin-bottom: 14px;
+        }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 16px;
+        }
+
+        .stat-item {
+            background: #0d1110;
+            border-radius: 12px;
+            padding: 14px 16px;
+            border: 1px solid rgba(46, 230, 173, 0.06);
+        }
+
+        .stat-item .label {
+            font-size: 0.65rem;
+            color: #8fa39c;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-item .value {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #f2f5f4;
+            margin-top: 4px;
+        }
+
+        .stat-item .value.neon {
+            color: #2ee6ad;
+        }
+        .stat-item .value.red {
+            color: #ff6b6b;
+        }
+        .stat-item .value.orange {
+            color: #ffb347;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #1a1e1c;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .progress-bar .fill {
+            height: 100%;
+            background: linear-gradient(90deg, #2ee6ad, #39e6e6);
+            border-radius: 10px;
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+
+        .attack-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(46, 230, 173, 0.06);
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .attack-row:last-child {
+            border-bottom: none;
+        }
+
+        .attack-target {
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .attack-target .small {
+            font-weight: 400;
+            color: #8fa39c;
+            font-size: 0.7rem;
+            margin-left: 8px;
+        }
+
+        .attack-status {
+            font-size: 0.7rem;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+
+        .attack-status.running {
+            background: rgba(46, 230, 173, 0.15);
+            color: #2ee6ad;
+        }
+        .attack-status.completed {
+            background: rgba(46, 230, 173, 0.08);
+            color: #8fa39c;
+        }
+        .attack-status.stopped {
+            background: rgba(255, 107, 107, 0.12);
+            color: #ff6b6b;
+        }
+        .attack-status.pending {
+            background: rgba(255, 179, 71, 0.12);
+            color: #ffb347;
+        }
+
+        .attack-progress {
+            font-size: 0.8rem;
+            color: #8fa39c;
+            min-width: 50px;
+            text-align: right;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #8fa39c;
+        }
+        .empty-state .emoji {
+            font-size: 2.4rem;
+            margin-bottom: 12px;
+            display: block;
+        }
+
+        .refresh-btn {
+            background: rgba(46, 230, 173, 0.08);
+            border: 1px solid rgba(46, 230, 173, 0.2);
+            color: #2ee6ad;
+            padding: 8px 20px;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+        .refresh-btn:hover {
+            background: rgba(46, 230, 173, 0.18);
+        }
+
+        .live-badge {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: #2ee6ad;
+            border-radius: 50%;
+            animation: pulse-dot 1.2s ease-in-out infinite;
+            margin-right: 6px;
+        }
+
+        @keyframes pulse-dot {
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 0.3;
+                transform: scale(0.6);
+            }
+        }
+
+        .timestamp {
+            font-size: 0.65rem;
+            color: #5a6b64;
+            margin-top: 16px;
+            text-align: center;
+        }
+
+        @media (max-width: 480px) {
+            .stat-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            .attack-row {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 6px;
+            }
+            .attack-progress {
+                text-align: left;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="app">
+
+        <!-- HEADER -->
+        <div class="header">
+            <span class="brand">⬡ Prime Purge</span>
+            <div>
+                <span class="badge"><span class="live-badge"></span> LIVE</span>
+                <button class="refresh-btn" onclick="fetchAttacks()">⟳ Rafraîchir</button>
+            </div>
+        </div>
+
+        <!-- STATS GLOBALES -->
+        <div class="card">
+            <div class="card-title">📊 Statistiques globales</div>
+            <div class="stat-grid" id="statsGrid">
+                <div class="stat-item">
+                    <div class="label">Attaques totales</div>
+                    <div class="value" id="totalAttacks">0</div>
+                </div>
+                <div class="stat-item">
+                    <div class="label">En cours</div>
+                    <div class="value neon" id="activeAttacks">0</div>
+                </div>
+                <div class="stat-item">
+                    <div class="label">SMS envoyés</div>
+                    <div class="value" id="totalSent">0</div>
+                </div>
+                <div class="stat-item">
+                    <div class="label">Proxies actifs</div>
+                    <div class="value orange" id="proxyCount">0</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- LISTE DES ATTAQUES -->
+        <div class="card">
+            <div class="card-title">📋 Attaques récentes</div>
+            <div id="attackList">
+                <div class="empty-state">
+                    <span class="emoji">⏳</span>
+                    Aucune attaque pour le moment.<br />
+                    Lancez une attaque depuis l'interface principale.
+                </div>
+            </div>
+        </div>
+
+        <div class="timestamp" id="lastUpdate">Dernière mise à jour : --</div>
+    </div>
+
+    <script>
+        // ============================================================
+        // PRIME PURGE - STATUS PAGE
+        // ============================================================
+
+        const API_URL = window.location.origin + '/api';
+
+        let attackData = [];
+        let statsCache = {};
+
+        // --- RÉFÉRENCES DOM ---
+        const totalAttacksEl = document.getElementById('totalAttacks');
+        const activeAttacksEl = document.getElementById('activeAttacks');
+        const totalSentEl = document.getElementById('totalSent');
+        const proxyCountEl = document.getElementById('proxyCount');
+        const attackListEl = document.getElementById('attackList');
+        const lastUpdateEl = document.getElementById('lastUpdate');
+
+        // --- FETCH DES ATTAQUES ---
+        async function fetchAttacks() {
+            try {
+                const [attacksRes, statsRes] = await Promise.all([
+                    fetch(API_URL + '/attacks'),
+                    fetch(API_URL + '/stats')
+                ]);
+
+                const attacks = await attacksRes.json();
+                const stats = await statsRes.json();
+
+                attackData = attacks;
+                statsCache = stats;
+
+                renderStats(stats);
+                renderAttacks(attacks);
+                updateTimestamp();
+
+            } catch (error) {
+                console.error('Erreur fetch:', error);
+                attackListEl.innerHTML = `
+                    <div class="empty-state">
+                        <span class="emoji">⚠️</span>
+                        Impossible de contacter le serveur.<br />
+                        Vérifiez que le backend est bien démarré.
+                    </div>
+                `;
+            }
+        }
+
+        // --- RENDER STATS ---
+        function renderStats(stats) {
+            totalAttacksEl.textContent = stats.total_attacks || 0;
+            activeAttacksEl.textContent = stats.active_attacks || 0;
+            totalSentEl.textContent = stats.total_sms_sent || 0;
+            proxyCountEl.textContent = stats.proxies_available || 0;
+        }
+
+        // --- RENDER LISTE DES ATTAQUES ---
+        function renderAttacks(attacks) {
+            if (!attacks || attacks.length === 0) {
+                attackListEl.innerHTML = `
+                    <div class="empty-state">
+                        <span class="emoji">⏳</span>
+                        Aucune attaque pour le moment.<br />
+                        Lancez une attaque depuis l'interface principale.
+                    </div>
+                `;
+                return;
+            }
+
+            // Trier par date (plus récent en premier)
+            const sorted = [...attacks].sort((a, b) => b.startTime - a.startTime);
+
+            let html = '';
+            for (const attack of sorted) {
+                const statusClass = attack.status === 'running' ? 'running' :
+                                   attack.status === 'completed' ? 'completed' :
+                                   attack.status === 'stopped' ? 'stopped' : 'pending';
+
+                const statusLabel = attack.status === 'running' ? '⚡ EN COURS' :
+                                   attack.status === 'completed' ? '✅ TERMINÉ' :
+                                   attack.status === 'stopped' ? '🛑 ARRÊTÉ' : '⏳ EN ATTENTE';
+
+                const progress = attack.progress || 0;
+                const sent = attack.sent || 0;
+                const total = attack.total || 0;
+
+                html += `
+                    <div class="attack-row">
+                        <div>
+                            <div class="attack-target">
+                                +${attack.target}
+                                <span class="small">ID: ${attack.id}</span>
+                            </div>
+                            <span class="attack-status ${statusClass}">${statusLabel}</span>
+                        </div>
+                        <div style="flex:1; min-width:100px;">
+                            <div class="progress-bar">
+                                <div class="fill" style="width:${progress}%;"></div>
+                            </div>
+                            <div style="display:flex; justify-content:space-between; font-size:0.7rem; color:#8fa39c; margin-top:4px;">
+                                <span>${sent} / ${total} SMS</span>
+                                <span>${progress}%</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            attackListEl.innerHTML = html;
+        }
+
+        // --- UPDATE TIMESTAMP ---
+        function updateTimestamp() {
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            lastUpdateEl.textContent = `🔄 Dernière mise à jour : ${timeStr}`;
+        }
+
+        // --- WEBSOCKET POUR MISE À JOUR EN TEMPS RÉEL ---
+        function connectWebSocket() {
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsUrl = protocol + '//' + window.location.host + '/ws';
+            const ws = new WebSocket(wsUrl);
+
+            ws.onopen = function() {
+                console.log('🔌 WebSocket connecté (status page)');
+            };
+
+            ws.onmessage = function(event) {
+                try {
+                    const data = JSON.parse(event.data);
+                    if (data.type === 'update') {
+                        // Mettre à jour les données en direct
+                        // On refetch pour être sûr d'avoir les données à jour
+                        fetchAttacks();
+                    }
+                } catch (e) {
+                    console.log('Erreur WebSocket:', e);
+                }
+            };
+
+            ws.onclose = function() {
+                console.log('🔌 WebSocket déconnecté, reconnexion...');
+                setTimeout(connectWebSocket, 3000);
+            };
+
+            ws.onerror = function(error) {
+                console.log('⚠️ Erreur WebSocket:', error);
+            };
+        }
+
+        // --- RAFRAÎCHISSEMENT AUTOMATIQUE (toutes les 3s) ---
+        let autoRefreshInterval;
+
+        function startAutoRefresh() {
+            if (autoRefreshInterval) clearInterval(autoRefreshInterval);
+            autoRefreshInterval = setInterval(fetchAttacks, 3000);
+        }
+
+        // --- INIT ---
+        fetchAttacks();
+        startAutoRefresh();
+        connectWebSocket();
+
+        // Rafraîchir aussi quand l'onglet redevient visible
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') {
+                fetchAttacks();
+            }
+        });
+
+        console.log('🔥 PRIME PURGE - PAGE DE STATUT EN DIRECT');
+        console.log('📡 Mise à jour automatique toutes les 3s');
+    </script>
+</body>
+</html>
