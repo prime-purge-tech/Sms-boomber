@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: prime-purge
+    env: node
+    region: frankfurt
+    buildCommand: npm install
+    startCommand: node server.js
+    plan: free
+    envVars:
+      - key: NODE_ENV
+        value: production

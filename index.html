@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prime Purge - SMS Boomer</title>
+<style>
+  :root{
+    --bg: #0a0e0d;
+    --panel: #121614;
+    --panel-border: rgba(46, 230, 173, 0.35);
+    --neon: #2ee6ad;
+    --neon-soft: rgba(46, 230, 173, 0.25);
+    --cyan: #39e6e6;
+    --text: #f2f5f4;
+    --muted: #8fa39c;
+    --input-bg: #0d1110;
+  }
+
+  *{ box-sizing: border-box; margin:0; padding:0; }
+
+  body{
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    display:flex;
+    justify-content:center;
+    min-height: 100vh;
+  }
+
+  .phone{
+    width: 100%;
+    max-width: 420px;
+    min-height: 100vh;
+    display:flex;
+    flex-direction:column;
+    padding-bottom: 70px;
+    position: relative;
+  }
+
+  header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding: 18px 20px;
+  }
+
+  .brand{
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--neon);
+    text-shadow: 0 0 12px var(--neon-soft), 0 0 24px var(--neon-soft);
+    letter-spacing: 0.5px;
+  }
+
+  .globe-icon{
+    width:26px; height:26px;
+    border-radius:50%;
+    border: 2px solid var(--text);
+    display:flex; align-items:center; justify-content:center;
+    position:relative;
+    color: var(--text);
+  }
+  .globe-icon::before{
+    content:"";
+    position:absolute;
+    width:100%; height:1.6px;
+    background: var(--text);
+  }
+  .globe-icon::after{
+    content:"";
+    position:absolute;
+    width:1.6px; height:100%;
+    background: var(--text);
+  }
+
+  main{
+    padding: 0 20px;
+    display:flex;
+    flex-direction:column;
+    gap: 22px;
+  }
+
+  .glass-card{
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    border-radius: 18px;
+    box-shadow: 0 0 20px rgba(46, 230, 173, 0.08), inset 0 0 30px rgba(46,230,173,0.02);
+    backdrop-filter: blur(10px);
+  }
+
+  .profile-card{
+    padding: 18px;
+    display:flex;
+    align-items:center;
+    gap:16px;
+  }
+
+  .avatar-ring{
+    width: 76px; height:76px;
+    border-radius:50%;
+    border: 3px solid var(--neon);
+    box-shadow: 0 0 16px var(--neon-soft);
+    display:flex; align-items:center; justify-content:center;
+    flex-shrink:0;
+    overflow:hidden;
+    background:#1a1e1c;
+  }
+  .avatar-ring img{
+    width:100%; height:100%;
+    object-fit:cover;
+  }
+  .avatar-fallback{
+    font-size: 0.7rem;
+    color: var(--muted);
+    text-align:center;
+  }
+
+  .profile-info h1{
+    font-size: 1.25rem;
+    font-weight: 800;
+    margin-bottom: 6px;
+  }
+  .profile-info .meta-pill{
+    display:inline-block;
+    background: rgba(46,230,173,0.08);
+    border: 1px solid var(--panel-border);
+    border-radius: 20px;
+    padding: 3px 10px;
+    font-size: 0.62rem;
+    color: var(--neon);
+    font-weight:600;
+    letter-spacing:0.3px;
+  }
+
+  .banner{
+    width: 100%;
+    aspect-ratio: 1080 / 608;
+    border-radius: 22px;
+    overflow:hidden;
+    border: 1px solid var(--panel-border);
+    box-shadow: 0 0 20px rgba(46,230,173,0.08);
+  }
+  .banner img{
+    width:100%; height:100%;
+    object-fit:cover;
+    display:block;
+  }
+
+  .form-card{
+    padding: 20px;
+    display:flex;
+    flex-direction:column;
+    gap: 18px;
+  }
+
+  .field label{
+    display:block;
+    font-size: 0.68rem;
+    color: var(--text);
+    margin-bottom: 6px;
+    font-weight: 600;
+  }
+
+  .input-shell{
+    display:flex;
+    align-items:center;
+    gap: 12px;
+    background: var(--input-bg);
+    border: 1px solid var(--panel-border);
+    border-radius: 12px;
+    padding: 14px 16px;
+  }
+
+  .input-shell input,
+  .input-shell select{
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--text);
+    font-size: 0.85rem;
+    width: 100%;
+    font-family: inherit;
+  }
+  .input-shell input::placeholder{
+    color: var(--muted);
+  }
+  .input-shell select{
+    appearance: none;
+    -webkit-appearance:none;
+    cursor:pointer;
+  }
+  .select-arrow{
+    color: var(--neon);
+    font-size: 0.8rem;
+  }
+
+  .submit-btn{
+    width:100%;
+    padding: 15px;
+    border:none;
+    border-radius: 14px;
+    background: linear-gradient(90deg, var(--neon), var(--cyan));
+    color: #04120d;
+    font-weight: 800;
+    font-size: 0.9rem;
+    letter-spacing: 0.3px;
+    cursor:pointer;
+    box-shadow: 0 0 22px rgba(46,230,173,0.35);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap: 10px;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+  .submit-btn:hover:not(:disabled){
+    transform: translateY(-1px);
+    box-shadow: 0 0 30px rgba(46,230,173,0.5);
+  }
+  .submit-btn:disabled{
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  .submit-btn .accent{
+    background: rgba(4,18,13,0.15);
+    padding: 2px 8px;
+    border-radius: 6px;
+  }
+
+  .status-msg{
+    text-align: center;
+    font-size: 0.8rem;
+    padding: 8px;
+    border-radius: 10px;
+    margin-top: 5px;
+    display: none;
+  }
+  .status-msg.success{
+    display: block;
+    color: var(--neon);
+    background: rgba(46,230,173,0.08);
+    border: 1px solid rgba(46,230,173,0.2);
+  }
+  .status-msg.error{
+    display: block;
+    color: #ff6b6b;
+    background: rgba(255,107,107,0.08);
+    border: 1px solid rgba(255,107,107,0.2);
+  }
+
+  nav.bottom-nav{
+    position: fixed;
+    bottom:0; left:50%;
+    transform: translateX(-50%);
+    width:100%;
+    max-width: 420px;
+    background: #0c100e;
+    border-top: 1px solid var(--panel-border);
+    display:flex;
+    justify-content:space-around;
+    padding: 10px 0 8px;
+  }
+
+  .nav-item{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap: 4px;
+    font-size: 0.7rem;
+    color: var(--muted);
+    cursor:pointer;
+    background:none;
+    border:none;
+    padding: 4px 14px;
+    border-radius: 10px;
+  }
+  .nav-item.active{
+    color: var(--neon);
+    background: rgba(46,230,173,0.08);
+  }
+  .nav-icon{
+    width:20px; height:20px;
+  }
+
+  .toast{
+    position: fixed;
+    bottom: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    padding: 12px 20px;
+    border-radius: 12px;
+    color: var(--text);
+    font-size: 0.85rem;
+    box-shadow: 0 0 30px rgba(0,0,0,0.8);
+    z-index: 100;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+    max-width: 90%;
+    text-align: center;
+  }
+  .toast.show{
+    opacity: 1;
+  }
+  .toast.success{ border-color: var(--neon); }
+  .toast.error{ border-color: #ff6b6b; }
+</style>
+</head>
+<body>
+
+<div class="phone">
+
+  <header>
+    <div></div>
+    <div class="brand">Prime Purge</div>
+    <div class="globe-icon" aria-hidden="true"></div>
+  </header>
+
+  <main>
+
+    <section class="glass-card profile-card">
+      <div class="avatar-ring">
+        <img src="https://files.catbox.moe/3815ve.jpg" alt="Avatar" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔥</text></svg>'">
+      </div>
+      <div class="profile-info">
+        <h1>BOOMBER SMS</h1>
+        <span class="meta-pill">OWNER • Exp: @dev_no_namee</span>
+      </div>
+    </section>
+
+    <section class="banner">
+      <img src="https://files.catbox.moe/vecyhl.jpg" alt="Banner" onerror="this.style.display='none'">
+    </section>
+
+    <section class="glass-card form-card">
+      <div class="field">
+        <label for="targets">Numéro cible</label>
+        <div class="input-shell">
+          <span style="color:var(--neon);font-weight:bold;">+</span>
+          <input type="text" id="targets" placeholder="6281234567890">
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="type">Type d'attaque</label>
+        <div class="input-shell">
+          <select id="type">
+            <option value="sms">SMS Boomer</option>
+            <option value="voice">Appel Vocal</option>
+            <option value="mixed">Mixte</option>
+          </select>
+          <span class="select-arrow">▾</span>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="count">Nombre de SMS (max 500)</label>
+        <div class="input-shell">
+          <input type="number" id="count" value="50" min="10" max="500">
+        </div>
+      </div>
+    </section>
+
+    <button class="submit-btn" id="submitBtn">
+      <span>➤</span> Lancer <span class="accent">l'attaque</span>
+    </button>
+
+    <div id="statusMsg" class="status-msg"></div>
+
+  </main>
+
+  <nav class="bottom-nav">
+    <button class="nav-item">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>
+      Home
+    </button>
+    <button class="nav-item active">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18"/></svg>
+      WhatsApp
+    </button>
+    <button class="nav-item" id="toolsBtn">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+      Tools
+    </button>
+  </nav>
+
+  <div id="toast" class="toast"></div>
+</div>
+
+<script>
+// ============================================================
+// PRIME PURGE - CLIENT SCRIPT
+// ============================================================
+
+const API_URL = window.location.origin + '/api';
+const submitBtn = document.getElementById('submitBtn');
+const targetInput = document.getElementById('targets');
+const typeSelect = document.getElementById('type');
+const countInput = document.getElementById('count');
+const statusMsg = document.getElementById('statusMsg');
+const toastEl = document.getElementById('toast');
+
+let toastTimeout = null;
+
+function showToast(message, type = 'success') {
+  toastEl.textContent = message;
+  toastEl.className = 'toast ' + type + ' show';
+  clearTimeout(toastTimeout);
+  toastTimeout = setTimeout(() => {
+    toastEl.classList.remove('show');
+  }, 4000);
+}
+
+function showStatus(message, type = 'success') {
+  statusMsg.textContent = message;
+  statusMsg.className = 'status-msg ' + type;
+}
+
+async function launchAttack() {
+  const target = targetInput.value.trim();
+  const type = typeSelect.value;
+  const count = parseInt(countInput.value) || 50;
+
+  // Validation
+  if (!target || target.length < 8) {
+    showStatus('❌ Entrez un numéro valide (ex: 6281234567890)', 'error');
+    return;
+  }
+
+  if (count < 1 || count > 500) {
+    showStatus('❌ Le nombre doit être entre 1 et 500', 'error');
+    return;
+  }
+
+  // Désactiver le bouton
+  submitBtn.disabled = true;
+  submitBtn.innerHTML = '⏳ Lancement en cours...';
+  showStatus('', '');
+
+  try {
+    const response = await fetch(API_URL + '/attack/start', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        target: target,
+        count: count,
+        type: type
+      })
+    });
+
+    const result = await response.json();
+
+    if (result.success) {
+      showStatus(`✅ Attaque lancée ! ID: ${result.attackId} | ${result.total} SMS vers ${result.target}`, 'success');
+      showToast(`🔥 ${result.total} SMS envoyés à ${result.target}`, 'success');
+      
+      // Ouvrir le statut en temps réel
+      window.open(`/status.html?id=${result.attackId}`, '_blank');
+    } else {
+      showStatus('❌ Erreur: ' + (result.error || 'Inconnue'), 'error');
+      showToast('❌ Erreur: ' + (result.error || 'Inconnue'), 'error');
+    }
+  } catch (error) {
+    showStatus('❌ Connexion au serveur échouée: ' + error.message, 'error');
+    showToast('❌ Serveur indisponible', 'error');
+  } finally {
+    submitBtn.disabled = false;
+    submitBtn.innerHTML = '<span>➤</span> Lancer <span class="accent">l\'attaque</span>';
+  }
+}
+
+// --- ÉVÉNEMENTS ---
+submitBtn.addEventListener('click', launchAttack);
+
+targetInput.addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') launchAttack();
+});
+
+countInput.addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') launchAttack();
+});
+
+// Formatage du numéro
+targetInput.addEventListener('input', function() {
+  // Enlever les espaces et caractères spéciaux
+  this.value = this.value.replace(/[^0-9+]/g, '');
+  if (!this.value.startsWith('+') && this.value.length > 0) {
+    // Ajouter + si absent
+    // this.value = '+' + this.value;
+  }
+});
+
+// --- CONNEXION WEBSOCKET POUR STATUT EN DIRECT ---
+function connectWebSocket() {
+  const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+  const wsUrl = protocol + '//' + window.location.host + '/ws';
+  const ws = new WebSocket(wsUrl);
+
+  ws.onopen = function() {
+    console.log('🔌 WebSocket connecté');
+  };
+
+  ws.onmessage = function(event) {
+    try {
+      const data = JSON.parse(event.data);
+      if (data.type === 'update') {
+        // Mettre à jour l'interface avec les données en direct
+        console.log('📊 Mise à jour:', data.data);
+      }
+    } catch (e) {
+      console.log('Erreur WebSocket:', e);
+    }
+  };
+
+  ws.onclose = function() {
+    console.log('🔌 WebSocket déconnecté, reconnexion dans 3s...');
+    setTimeout(connectWebSocket, 3000);
+  };
+
+  ws.onerror = function(error) {
+    console.log('⚠️ Erreur WebSocket:', error);
+  };
+}
+
+// Démarrer la connexion WebSocket
+connectWebSocket();
+
+// Message de bienvenue
+console.log('🔥 PRIME PURGE - SMS BOOMER');
+console.log('📱 Entrez un numéro et lancez l\'attaque !');
+</script>
+
+</body>
+</html>

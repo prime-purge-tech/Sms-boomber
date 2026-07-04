@@ -1,0 +1,4 @@
+# Liste des proxies au format host:port
+# Exemple:
+# 123.45.67.89:3128
+# 98.76.54.32:8080
